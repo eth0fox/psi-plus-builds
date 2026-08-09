@@ -1,66 +1,95 @@
 name: Build psi+
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
 
-    push:
-        branches:
-            - main
+  push:
+    branches:
+      - main
 
 jobs:
-    update:
-        name: Update eth0fox/psi from patches
-        runs-on: ubuntu-latest
-        steps:
-            - name: Set up git
-              run: |
-                git config --global user.name "GitHub Actions"
-                
-            - name: Checkout (this) repository
-              uses: actions/checkout@v3
-              with:
-                fetch-depth: 1
-                path: builds
-            - name: Checkout psi repository
-              uses: actions/checkout@v3
-              with:
-                repository: eth0fox/psi
-                fetch-depth: 0
-                ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-                persist-credentials: true
-                path: psi
-            - name: Add upstream remote
-              working-directory: psi
-              run: |
-                git remote add upstream https://github.com/psi-im/psi.git
-                git fetch upstream
-            - name: Apply & push patches
-              working-directory: psi
-              run: |
-                for patchset in ../builds/patchsets/*; do
-                  echo ""
-                  echo "Applying patchset: $patchset"
-                  branch_name=$(basename "$patchset")
-                  git checkout -B "$branch_name" upstream/master
-                  git am "$patchset"/*.patch
-                  git push origin "$branch_name" --force
-                  echo "---"
-                done
-                echo "==="
+  update:
+    name: Update eth0fox/psi from patches
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up git
+        run: |
+          git config --global user.name "GitHub Actions"
 
-                # Reset master and merge in the patch branches
-                echo ""
-                echo ""
-                echo "Merging patch branches into master"
-                git checkout -B master upstream/master
-                for patchset in ../builds/patchsets/*; do
-                  echo ""
-                  echo "Merging patchset: $patchset"
-                  branch_name=$(basename "$patchset")
-                  git merge --no-ff "$branch_name" -m "Merge $branch_name"
-                  git push origin master --force
-                done
-                
-            
-                
-                
+      - name: Checkout (this) repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          path: builds
+      - name: Checkout psi repository
+        uses: actions/checkout@v3
+        with:
+          repository: eth0fox/psi
+          fetch-depth: 0
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          persist-credentials: true
+          path: psi
+      - name: Add upstream remote
+        working-directory: psi
+        run: |
+          git remote add upstream https://github.com/psi-im/psi.git
+          git fetch upstream
+      - name: Apply & push patches
+        working-directory: psi
+        run: |
+          for patchset in ../builds/patchsets/*; do
+            echo ""
+            echo "- Applying patchset: $patchset -"
+            branch_name=$(basename "$patchset")
+            git checkout -B "$branch_name" upstream/master
+            git am "$patchset"/*.patch
+            git push origin "$branch_name" --force
+          done
+
+          # Reset master and merge in the patch branches
+          echo ""
+          echo " == Merging patch branches into master =="
+          echo ""
+          git checkout -B master upstream/master
+          for patchset in ../builds/patchsets/*; do
+            echo ""
+            echo "- Merging patchset: $patchset -"
+            branch_name=$(basename "$patchset")
+            git merge --no-ff "$branch_name" -m "Merge $branch_name"
+            git push origin master --force
+          done
+  
+  snapshot:
+    name: Build psi+ snapshot
+    runs-on: ubuntu-latest
+    needs: update
+    steps:
+      - name: Set up git
+        run: |
+          git config --global user.name "GitHub Actions"
+      - name: Checkout psi+ repository
+        uses: actions/checkout@v3
+        with:
+          repository: psi-plus/psi-plus-snapshots
+          fetch-depth: 1
+          path: psi-plus-snapshots
+      - name: Update repo URLs
+        working-directory: psi-plus-snapshots
+        run: |
+          sed -i "s/https:\/\/github.com\/psi-im\/psi.git/https:\/\/github.com\/eth0fox\/psi.git/g" generate-single-repo.sh
+      - name: Generate snapshot
+        working-directory: psi-plus-snapshots
+        run: |
+          ./generate-single-repo.sh
+      
+      - name: Create tarball
+        working-directory: psi-plus-snapshots
+        run: |
+          tar -czf ../psi-plus-snapshot.tar.gz psi-plus-snapshot
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: psi-plus-snapshot
+          path: psi-plus-snapshot.tar.gz
+
+        
