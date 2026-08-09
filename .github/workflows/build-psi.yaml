@@ -85,9 +85,8 @@ jobs:
           ./generate-single-repo.sh
       
       - name: Create tarball
-        working-directory: psi-plus-snapshots
         run: |
-          tar -czf ../psi-plus-snapshot.tar.gz psi-plus-snapshots
+          tar -czf psi-plus-snapshot.tar.gz psi-plus-snapshots
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
