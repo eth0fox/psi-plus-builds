@@ -1,3 +1,6 @@
+# TODO: Get dictionaries
+# TODO: Get translations
+
 name: Build psi+
 
 on:
@@ -58,7 +61,7 @@ jobs:
             git merge --no-ff "$branch_name" -m "Merge $branch_name"
             git push origin master --force
           done
-  
+
   snapshot:
     name: Build psi+ snapshot
     runs-on: ubuntu-latest
@@ -83,7 +86,7 @@ jobs:
         working-directory: psi-plus-snapshots
         run: |
           ./generate-single-repo.sh
-      
+
       - name: Create tarball
         run: |
           tar -czf psi-plus-snapshot.tar.gz psi-plus-snapshots
@@ -93,4 +96,36 @@ jobs:
           name: psi-plus-snapshot
           path: psi-plus-snapshot.tar.gz
 
-        
+  build_mac_x86:
+    name: Build psi+ for macOS x86_64
+    runs-on: macos-26-intel
+    needs: snapshot
+    steps:
+      - name: Install dependencies
+        run: |
+          brew install ccache coreutils cmake hunspell minizip qt@5 qtkeychain tidy-html5 libotr libomemo-c gnupg pinentry-mac wget 
+      - name: Download source snapshot
+        uses: actions/download-artifact@v5
+        with:
+          name: psi-plus-snapshot
+      - name: Extract source snapshot
+        run: |
+          tar -xzf psi-plus-snapshot.tar.gz
+          ls
+
+      
+      - name: Hope for the best
+        working-directory: psi-plus-snapshots
+        run: |
+          ./mac/build-using-homebrew.sh
+      
+      - name: Move artifact
+        run: |
+          mv Psi*.dmg psi-plus-mac-x86_64.dmg
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: psi-plus-mac-x86_64
+          path: psi-plus-mac-x86_64.dmg
+
+
