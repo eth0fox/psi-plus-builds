@@ -1,0 +1,53 @@
+name: Build psi+
+
+on:
+    workflow_dispatch:
+
+    push:
+        branches:
+            - main
+
+jobs:
+    update:
+        name: Update eth0fox/psi from patches
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout (this) repository
+              uses: actions/checkout@v3
+              with:
+                fetch-depth: 1
+                path: builds
+            - name: Checkout psi repository
+              uses: actions/checkout@v3
+              with:
+                repository: eth0fox/psi
+                fetch-depth: 0
+                ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+                persist-credentials: true
+                path: psi
+            - name: Add upstream remote
+              working-directory: psi
+              run: |
+                git remote add upstream https://github.com/psi-im/psi.git
+                git fetch upstream
+            - name: Apply & push patches
+              working-directory: psi
+              run: |
+                for patchset in ../builds/patchsets/*; do
+                  branch_name=$(basename "$patchset")
+                  git checkout -B "$branch_name" upstream/master
+                  git am "$patchset"/*.patch
+                  git push origin "$branch_name" --force
+                done
+
+                # Reset master and merge in the patch branches
+                git checkout -B master upstream/master
+                for patchset in ../builds/patchsets/*; do
+                  branch_name=$(basename "$patchset")
+                  git merge --no-ff "$branch_name" -m "Merge $branch_name"
+                  git push origin master --force
+                done
+                
+            
+                
+                
