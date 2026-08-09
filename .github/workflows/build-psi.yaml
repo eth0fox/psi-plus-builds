@@ -12,6 +12,10 @@ jobs:
         name: Update eth0fox/psi from patches
         runs-on: ubuntu-latest
         steps:
+            - name: Set up git
+              run: |
+                git config --global user.name "GitHub Actions"
+                
             - name: Checkout (this) repository
               uses: actions/checkout@v3
               with:
