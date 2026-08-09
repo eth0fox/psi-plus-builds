@@ -1,0 +1,47 @@
+From 2ff446aa52c25b34167094245ed2a6ecc8549033 Mon Sep 17 00:00:00 2001
+From: fox <fox@boxfox.es>
+Date: Sun, 9 Aug 2026 11:39:42 +0100
+Subject: [PATCH 3/3] set homebrew path seperately for arm64
+
+---
+ mac/build-using-homebrew.sh  | 10 +++++++++-
+ mac/homebrew-toolchain.cmake |  2 +-
+ 2 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/mac/build-using-homebrew.sh b/mac/build-using-homebrew.sh
+index dd9cf723..67acdd86 100755
+--- a/mac/build-using-homebrew.sh
++++ b/mac/build-using-homebrew.sh
+@@ -33,7 +33,15 @@
+ 
+ set -e
+ 
+-[ -z "${HOMEBREW}" ] && HOMEBREW="/usr/local"
++[ -z "${OSX_ARCHITECTURES}"] && export OSX_ARCHITECTURES="$(uname -m)"
++
++if [ -z "${HOMEBREW}" ]; then
++    if [ "${OSX_ARCHITECTURES}" = "arm64" ]; then
++        export HOMEBREW=/opt/homebrew
++    else
++        export HOMEBREW=/usr/local
++    fi
++fi
+ 
+ PATH="${HOMEBREW}/bin:${PATH}"
+ PATH="${HOMEBREW}/opt/ccache/libexec:${PATH}"
+diff --git a/mac/homebrew-toolchain.cmake b/mac/homebrew-toolchain.cmake
+index 1ed747fc..0980e831 100644
+--- a/mac/homebrew-toolchain.cmake
++++ b/mac/homebrew-toolchain.cmake
+@@ -1,7 +1,7 @@
+ if(DEFINED ENV{HOMEBREW})
+     set(HOMEBREW "$ENV{HOMEBREW}")
+ else()
+-    set(HOMEBREW "/usr/local")
++    message( FATAL_ERROR "HOMEBREW environment variable is missing. (are you using the 'build-using-homebrew.sh' script?)" )
+ endif()
+ 
+ if(DEFINED ENV{OSX_DEPLOYMENT_TARGET})
+-- 
+2.54.0
+

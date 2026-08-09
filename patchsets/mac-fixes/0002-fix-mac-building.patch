@@ -1,0 +1,50 @@
+From abdae9f10b5dbcd0d825c1930aeca89e38feb12c Mon Sep 17 00:00:00 2001
+From: fox <fox@boxfox.es>
+Date: Sun, 9 Aug 2026 11:35:36 +0100
+Subject: [PATCH 2/3] fix mac building
+
+---
+ mac/build-using-homebrew.sh  | 6 +++---
+ mac/homebrew-toolchain.cmake | 2 ++
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/mac/build-using-homebrew.sh b/mac/build-using-homebrew.sh
+index 67629eaf..dd9cf723 100755
+--- a/mac/build-using-homebrew.sh
++++ b/mac/build-using-homebrew.sh
+@@ -37,8 +37,8 @@ set -e
+ 
+ PATH="${HOMEBREW}/bin:${PATH}"
+ PATH="${HOMEBREW}/opt/ccache/libexec:${PATH}"
+-CUR_DIR="$(dirname $(realpath -s ${0}))"
+-MAIN_DIR="$(realpath -s ${CUR_DIR}/..)"
++CUR_DIR="$(dirname $(realpath ${0}))"
++MAIN_DIR="$(realpath ${CUR_DIR}/..)"
+ TOOLCHAIN_FILE="${CUR_DIR}/homebrew-toolchain.cmake"
+ 
+ [ -d "${MAIN_DIR}/plugins/generic" ] && \
+@@ -73,7 +73,7 @@ cd "${MAIN_DIR}/builddir"
+ 
+ which nproc > /dev/null && JOBS=$(nproc) || JOBS=4
+ 
+-cmake .. -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}" ${BUILD_OPTIONS} ${@}
++cmake .. -DCMAKE_TOOLCHAIN_FILE="${TOOLCHAIN_FILE}" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ${BUILD_OPTIONS} ${@}
+ cmake --build . --target all -- -j ${JOBS}
+ 
+ [ "${BUILD_ONLY}" = "true" ] && exit 0
+diff --git a/mac/homebrew-toolchain.cmake b/mac/homebrew-toolchain.cmake
+index efd31b0c..1ed747fc 100644
+--- a/mac/homebrew-toolchain.cmake
++++ b/mac/homebrew-toolchain.cmake
+@@ -25,6 +25,8 @@ set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${HOMEBREW}/opt/qt@5")
+ set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${HOMEBREW}/opt/qt5")
+ set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${HOMEBREW}/opt/qt")
+ 
++set (Qt5_DIR "${HOMEBREW}/opt/qt5/lib/cmake/Qt5")
++
+ set(CMAKE_C_COMPILER   "clang")
+ set(CMAKE_CXX_COMPILER "clang++")
+ 
+-- 
+2.54.0
+
