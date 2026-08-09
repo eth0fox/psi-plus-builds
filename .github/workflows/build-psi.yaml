@@ -87,7 +87,7 @@ jobs:
       - name: Create tarball
         working-directory: psi-plus-snapshots
         run: |
-          tar -czf ../psi-plus-snapshot.tar.gz psi-plus-snapshot
+          tar -czf ../psi-plus-snapshot.tar.gz psi-plus-snapshots
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
