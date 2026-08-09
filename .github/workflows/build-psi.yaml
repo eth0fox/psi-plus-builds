@@ -38,15 +38,24 @@ jobs:
               working-directory: psi
               run: |
                 for patchset in ../builds/patchsets/*; do
+                  echo ""
+                  echo "Applying patchset: $patchset"
                   branch_name=$(basename "$patchset")
                   git checkout -B "$branch_name" upstream/master
                   git am "$patchset"/*.patch
                   git push origin "$branch_name" --force
+                  echo "---"
                 done
+                echo "==="
 
                 # Reset master and merge in the patch branches
+                echo ""
+                echo ""
+                echo "Merging patch branches into master"
                 git checkout -B master upstream/master
                 for patchset in ../builds/patchsets/*; do
+                  echo ""
+                  echo "Merging patchset: $patchset"
                   branch_name=$(basename "$patchset")
                   git merge --no-ff "$branch_name" -m "Merge $branch_name"
                   git push origin master --force
