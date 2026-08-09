@@ -42,8 +42,8 @@ index 2d06b3a8..217a129c 100644
 +        CFStringRef cf_trackId = (CFStringRef)CFDictionaryGetValue(info, CFSTR("Track ID"));
 +        if (cf_trackId && CFStringHasPrefix(cf_trackId, CFSTR("spotify:"))) {
 +            QString url = CFStringToQString(cf_trackId)
-+                .replace(QChar(':'), QChar('/'));
-+                .replace("spotify/", "https://open.spotify.com/")
++                .replace(QChar(':'), QChar('/'))
++                .replace("spotify/", "https://open.spotify.com/");
 +            tune.setURL(url);
 +        }
 +
