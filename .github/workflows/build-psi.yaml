@@ -105,9 +105,10 @@ jobs:
         run: |
           brew install ccache coreutils cmake hunspell minizip qt@5 tidy-html5 libotr libomemo-c gnupg pinentry-mac wget 
           brew install --ignore-dependencies qtkeychain # it depends on QT 6, but we want QT 5.
-          brew link --force qt5
-          ln -s /usr/local/Cellar/qt5/*/mkspecs /usr/local/mkspecs
-          ln -s /usr/local/Cellar/qt5/*/plugins /usr/local/plugins
+          brew link --force qt@5
+          ls /usr/local/Cellar
+          sudo ln -s /usr/local/Cellar/qt@5/*/mkspecs /usr/local/mkspecs
+          sudo ln -s /usr/local/Cellar/qt@5/*/plugins /usr/local/plugins
       - name: Download source snapshot
         uses: actions/download-artifact@v5
         with:
