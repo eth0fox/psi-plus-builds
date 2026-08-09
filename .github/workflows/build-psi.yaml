@@ -78,7 +78,7 @@ jobs:
         run: |
           sed -i "s/https:\/\/github.com\/psi-im\/psi.git/https:\/\/github.com\/eth0fox\/psi.git/g" generate-single-repo.sh
           sed -i "s/https:\/\/github.com\/psi-plus\/psi-plus-snapshots.git/https:\/\/github.com\/psi-plus\/psi-plus-snapshots/g" generate-single-repo.sh
-          sed -i "s/NEW_VER=\"[^\"]*\"/NEW_VER=\"${PSI_NEW_HASH}\"/g" generate-single-repo.sh
+          sed -i "s/NEW_VER=\"[^\"]*\"/NEW_VER=\"\${PSI_NEW_HASH}\"/g" generate-single-repo.sh
       - name: Generate snapshot
         working-directory: psi-plus-snapshots
         run: |
