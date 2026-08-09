@@ -70,7 +70,7 @@ jobs:
       - name: Checkout psi+ repository
         uses: actions/checkout@v3
         with:
-          repository: psi-plus/psi-plus-snapshots
+          repository: psi-plus/psi-plus-snapshots.git
           fetch-depth: 1
           path: psi-plus-snapshots
       - name: Update repo URLs
