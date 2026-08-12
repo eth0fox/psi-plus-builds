@@ -130,7 +130,7 @@ jobs:
           export CPPFLAGS="-I/usr/local/opt/qt@5/include"
           export PKG_CONFIG_PATH="/usr/local/opt/qt@5/lib/pkgconfig"
 
-          sed -i "s/DCMAKE_BUILD_TYPE=Release/DCMAKE_BUILD_TYPE=${{ matrix.build-type }}/g" ./mac/build-using-homebrew.sh
+          sed -i '' -e "s/DCMAKE_BUILD_TYPE=Release/DCMAKE_BUILD_TYPE=${{ matrix.build-type }}/g" ./mac/build-using-homebrew.sh
           ./mac/build-using-homebrew.sh
       
       - name: Move artifact
